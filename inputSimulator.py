@@ -1,18 +1,32 @@
-from inputResolver import DataBase
+from Server import Server
+
+
+def get_key():
+    return input("type card id ")
 
 
 def wait_for_input():
-    database = DataBase()
+    server = Server()
     while True:
         try:
-            key = int(input("Type key (negative to finish) "))
-            if key < 0:
+            command = int(input("1 - card use, 2 - generate rapport, 3 - remove user, 4 - add card user, 5 - exit "))
+            if command == 1:
+                key = get_key()
+                server.notify_card_usage(key)
+            elif command == 2:
+                key = get_key()
+                server.generate_rapport(key)
+            elif command == 3:
+                key = get_key()
+                server.remove_user(key)
+            elif command == 4:
+                key = get_key()
+                name = input("type user name ")
+                server.add_user(key, name)
+            elif command == 5:
                 break
-            name = input("Type name to update (empty to skip) ")
-            database.process_card(key, name)
-            id_to_write = input("Type name to generate rapport (empty to skip) ")
-            if id_to_write:
-                database.generate_rapport(id_to_write)
+            else:
+                print("wrong input %s" % command)
         except ValueError:
             print("Incorrect input")
-    del database
+    del server

@@ -1,5 +1,5 @@
 import sqlite3
-import CsvWriter
+import csvRapport
 from operator import itemgetter
 
 
@@ -81,11 +81,21 @@ class DataBase:
     def generate_rapport(self, key):
         user = self.get_user(key)
         visits = self.get_card_uses(key)
-        CsvWriter.write_data(user, visits)
+        csvRapport.write_data(user, visits)
 
-    def remove_card_user(self, user_name):
-        sql_command = ''''''
+    def remove_card_user(self, key):
+        user = self.get_user(key)
+        sql_command = ''' UPDATE users
+                      SET user_name = "None"
+                      WHERE user_name = ?'''
+        cursor = self.base.cursor()
+        cursor.execute(sql_command, (user[1],))
+        sql_command = '''DELETE FROM visits WHERE card_used_id = ?'''
+        cursor.execute(sql_command, key)
+
+    def save(self):
+        self.base.commit()
 
     def __del__(self):
-        self.base.commit() # to save changes
+        self.base.commit()  # to save changes
         self.base.close()

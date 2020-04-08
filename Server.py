@@ -5,8 +5,8 @@ class Server:
     database = DataBase()
     clients_list = []
 
-    def notify_card_usage(self, key):
-        self.database.process_card(key)
+    def notify_card_usage(self, key, name=None):
+        self.database.process_card(key, name)
 
     def generate_rapport(self, key):
         self.database.generate_rapport(key)
@@ -20,5 +20,12 @@ class Server:
     def add_user(self, card_id, name):
         self.database.update_user(card_id, name)
 
-    def remove_user(self, name):
-        self.database.remove_card_user(name)
+    def remove_user(self, key):
+        self.database.remove_card_user(key)
+
+    def remove_terminal(self, terminal):
+        self.clients_list.remove(terminal)
+
+    def add_terminal(self, terminal):
+        self.clients_list.append(terminal)
+
