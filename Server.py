@@ -1,4 +1,4 @@
-from inputResolver import DataBase
+from database import DataBase
 
 
 class Server:
