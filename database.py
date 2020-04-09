@@ -10,7 +10,7 @@ class DataBase:
 
     def __init__(self):
         database_path = r"rfi_card.db"
-        self.base = sqlite3.connect(database_path)
+        self.base = sqlite3.connect(database_path, check_same_thread=False)
         cards = '''CREATE TABLE IF NOT EXISTS users (
                     card_number integer PRIMARY KEY,
                     user_name text
@@ -19,13 +19,14 @@ class DataBase:
                         card_used_id integer, 
                         time_in text DEFAULT CURRENT_TIMESTAMP,
                         time_out text,
+                        terminal text,
                         FOREIGN KEY(card_used_id) REFERENCES users (card_number)
                 )'''
         c = self.base.cursor()
         c.execute(cards)
         c.execute(card_uses)
 
-    def process_card(self, card_id, users_name):
+    def process_card(self, card_id, terminal, users_name):
         self.update_user(card_id, users_name)
         try:
             users_visits = self.get_card_uses(card_id)
@@ -33,9 +34,9 @@ class DataBase:
             if users_last_visit[2] == self.default_date_out_value:
                 self.set_uses_out(users_last_visit)
             else:
-                self.add_visit_record(card_id)
+                self.add_visit_record(card_id, terminal)
         except IndexError:
-            self.add_visit_record(card_id)
+            self.add_visit_record(card_id, terminal)
 
     def update_user(self, key, name=None):
         already_in_database = self.get_user(key)
@@ -51,6 +52,7 @@ class DataBase:
                       SET user_name = ?
                       WHERE card_number = ?'''
             c.execute(sql_update_name, (name, key))
+        self.base.commit()
 
     def get_user(self, key):
         cur = self.base.cursor()
@@ -65,11 +67,12 @@ class DataBase:
         uses.reverse()
         return uses
 
-    def add_visit_record(self, visitor_id):
-        visit_table = '''INSERT INTO visits(card_used_id, time_in, time_out) 
-                                    VALUES(?, datetime('now', 'localtime'),?)'''
+    def add_visit_record(self, visitor_id, terminal):
+        visit_table = '''INSERT INTO visits(card_used_id, time_in, time_out, terminal) 
+                                    VALUES(?, datetime('now', 'localtime'),?,?)'''
         c = self.base.cursor()
-        c.execute(visit_table, (visitor_id, self.default_date_out_value))
+        c.execute(visit_table, (visitor_id, self.default_date_out_value, terminal))
+        self.base.commit()
 
     def set_uses_out(self, record):
         sql = ''' UPDATE visits
@@ -92,8 +95,6 @@ class DataBase:
         cursor.execute(sql_command, (user[1],))
         sql_command = '''DELETE FROM visits WHERE card_used_id = ?'''
         cursor.execute(sql_command, key)
-
-    def save(self):
         self.base.commit()
 
     def __del__(self):
