@@ -3,7 +3,7 @@ import Server
 
 
 class MqttReceiver:
-    broker = "localhost"
+    broker = "DESKTOP-CM5F6LF"
     client = mqtt.Client("server")
     owner = {}
     simple_usage = "simple_usage"
@@ -14,7 +14,9 @@ class MqttReceiver:
     terminal_name = "terminal_name"
 
     def __init__(self, owner):
-        self.client.connect(self.broker)
+        self.client.tls_set("ca.crt")
+        self.client.username_pw_set(username='server', password='P@ssw0rd')
+        self.client.connect(self.broker, 8883)
         self.client.on_message = self.process_message
         self.client.subscribe(self.simple_usage)
         self.client.subscribe(self.generate_rapport)

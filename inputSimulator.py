@@ -7,7 +7,7 @@ def get_key():
 
 def wait_for_input():
     terminal_name = input("type terminal name ")
-    client = MqttSender.MqttSender(terminal_name)
+    client = MqttSender.MqttSender(terminal_name, "DESKTOP-CM5F6LF")
     while not client.is_name_accepted:
         pass
     while True:

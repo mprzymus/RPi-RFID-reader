@@ -1,5 +1,4 @@
 import paho.mqtt.client as mqtt
-import time
 
 
 class MqttSender:
@@ -10,14 +9,19 @@ class MqttSender:
     terminal_name_topic = "terminal_name"
     connection_topic = "connection"
 
-    def __init__(self, terminal_name, broker="localhost"):
+    def __init__(self, terminal_name, broker="localhost", port=8883):
         self.terminal_name = terminal_name
         self.broker = broker
-        self.client.connect(self.broker)
+        self.connect(port)
         self.client.on_message = self.process_message
         self.client.subscribe(self.terminal_name_topic)
         self.send_message(self.connection_topic, self.generate_message(["Add"]))
         self.client.loop_start()
+
+    def connect(self, port):
+        self.client.tls_set("ca.crt")
+        self.client.username_pw_set(username='client', password='password')
+        self.client.connect(self.broker, port)
 
     def process_message(self, client, userdata, message):
         topic = message.topic
